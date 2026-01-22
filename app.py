@@ -14,7 +14,7 @@ from invoice_generator import (
     InvoicePDFGenerator
 )
 
-app = Flask(__name__, template_folder='.', static_folder='.')
+app = Flask(__name__, template_folder='Vorlagen', static_folder='statisch')
 
 
 @app.route("/")
