@@ -1,7 +1,3 @@
-"""
-BK Therapy Rechnungsgenerator - Web App
-"""
-
 import os
 import io
 from datetime import datetime
@@ -14,7 +10,7 @@ from invoice_generator import (
     InvoicePDFGenerator
 )
 
-app = Flask(__name__, template_folder='Vorlagen', static_folder='statisch')
+app = Flask(__name__)
 
 
 @app.route("/")
@@ -27,7 +23,6 @@ def generate_invoice():
     try:
         data = request.json
         
-        # DEINE FIRMENDATEN - FEST EINGEBAUT
         issuer = Issuer(
             address=Address(
                 name="BK THERAPY",
@@ -40,7 +35,6 @@ def generate_invoice():
             tax_number="102/223/41561",
         )
         
-        # Kunde aus Formular
         client = Client(
             address=Address(
                 name=data.get("client_name", ""),
@@ -50,7 +44,6 @@ def generate_invoice():
             ),
         )
         
-        # Rechnungsdaten
         invoice_date = datetime.today()
         if data.get("invoice_date"):
             try:
@@ -66,7 +59,6 @@ def generate_invoice():
             due_days=14,
         )
         
-        # Positionen
         items = []
         for pos in data.get("items", []):
             if pos.get("description") and pos.get("quantity") and pos.get("unit_price"):
@@ -77,7 +69,6 @@ def generate_invoice():
                     unit=pos.get("unit", ""),
                 ))
         
-        # DEINE BANKDATEN - FEST EINGEBAUT
         payment = PaymentInfo(
             account_holder="Bekir Kaan Gülseren",
             iban="DE51 7206 9736 0002 5296 37",
@@ -85,14 +76,10 @@ def generate_invoice():
             bank_name="",
         )
         
-        # Logo-Pfad
-        logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
-        if not os.path.exists(logo_path):
-            logo_path = os.path.join(os.path.dirname(__file__), "static", "logo.png")
+        logo_path = os.path.join(os.path.dirname(__file__), "static", "logo.png")
         if not os.path.exists(logo_path):
             logo_path = None
         
-        # Rechnung erstellen
         invoice = Invoice(
             issuer=issuer,
             client=client,
@@ -104,7 +91,6 @@ def generate_invoice():
             logo_path=logo_path,
         )
         
-        # PDF generieren
         pdf_buffer = io.BytesIO()
         temp_path = f"/tmp/rechnung_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         
