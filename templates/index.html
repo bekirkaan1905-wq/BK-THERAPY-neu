@@ -1,1 +1,56 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BK Therapy - Rechnung erstellen</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; padding: 20px; color: #fff; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 1.5rem; }
+        .header p { color: #8892b0; font-size: 0.9rem; }
+        .card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 15px; color: #64ffda; }
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        label { display: block; font-size: 0.8rem; color: #8892b0; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(255,255,255,0.05); color: #fff; font-size: 1rem; }
+        input:focus { outline: none; border-color: #64ffda; }
+        .position-item { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .position-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .position-number { color: #64ffda; font-weight: 600; }
+        .btn-remove { background: rgba(255,82,82,0.2); border: none; color: #ff5252; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; }
+        .btn-add { width: 100%; padding: 12px; background: rgba(100,255,218,0.1); border: 1px dashed #64ffda; border-radius: 10px; color: #64ffda; cursor: pointer; }
+        .btn-generate { width: 100%; padding: 16px; background: linear-gradient(135deg, #64ffda 0%, #48c9b0 100%); border: none; border-radius: 12px; color: #1a1a2e; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .total-display { text-align: right; padding: 15px; background: rgba(100,255,218,0.1); border-radius: 10px; margin-top: 15px; }
+        .total-amount { font-size: 1.5rem; font-weight: 700; color: #64ffda; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BK Therapy</h1>
+            <p>Rechnung erstellen</p>
+        </div>
+        <form id="invoiceForm">
+            <div class="card">
+                <div class="card-title">Rechnungsdaten</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Rechnungsnummer</label><input type="text" id="invoice_number" placeholder="2025-001" required></div>
+                    <div class="form-group"><label>Datum</label><input type="date" id="invoice_date" required></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Kunde</div>
+                <div class="form-group"><label>Name</label><input type="text" id="client_name" required></div>
+                <div class="form-group"><label>Straße</label><input type="text" id="client_street"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>PLZ</label><input type="text" id="client_postal_code"></div>
+                    <div class="form-group"><label>Stadt</label><input type="text" id="client_city"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Positionen</div>
+                <div id="positions
