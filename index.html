@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>BK Therapy - Rechnung erstellen</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .header p {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #64ffda;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: #8892b0;
+            margin-bottom: 5px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #64ffda;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        input::placeholder {
+            color: #4a5568;
+        }
+        
+        /* Position Items */
+        .position-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .position-number {
+            font-weight: 600;
+            color: #64ffda;
+        }
+        
+        .btn-remove {
+            background: rgba(255, 82, 82, 0.2);
+            border: none;
+            color: #ff5252;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .btn-add {
+            width: 100%;
+            padding: 12px;
+            background: rgba(100, 255, 218, 0.1);
+            border: 1px dashed #64ffda;
+            border-radius: 10px;
+            color: #64ffda;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-add:hover {
+            background: rgba(100, 255, 218, 0.2);
+        }
+        
+        .btn-generate {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #64ffda 0%, #48c9b0 100%);
+            border: none;
+            border-radius: 12px;
+            color: #1a1a2e;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.3);
+        }
+        
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .total-display {
+            text-align: right;
+            padding: 15px;
+            background: rgba(100, 255, 218, 0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .total-label {
+            font-size: 0.9rem;
+            color: #8892b0;
+        }
+        
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #64ffda;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(100, 255, 218, 0.3);
+            border-top-color: #64ffda;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .collapsible {
+            cursor: pointer;
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .collapsible-content.open {
+            max-height: 1000px;
+        }
+        
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+        
+        .toggle-icon.open {
+            transform: rotate(180deg);
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff5252;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .toast.success {
+            background: #64ffda;
+            color: #1a1a2e;
+        }
+        
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/static/logo.png" alt="BK Therapy Logo" onerror="this.style.display='none'">
+            <h1>Rechnung erstellen</h1>
+            <p>Einfach ausfüllen und PDF generieren</p>
+        </div>
+        
+        <form id="invoiceForm">
+            <!-- Rechnungsdaten -->
+            <div class="card">
+                <div class="card-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Rechnungsdaten
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Rechnungsnummer</label>
+                        <input type="text" id="invoice_number" placeholder="2025-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Datum</label>
+                        <input type="date" id="invoice_date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Zahlungsziel (Tage)</label>
+                    <input type="number" id="due_days" value="14" min="1">
+                </div>
+            </div>
+            
+            <!-- Aussteller (eingeklappt) -->
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleSection('issuer')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Meine Daten
+                    <span class="toggle-icon" id="issuer-icon">▼</span>
+                </div>
+                <div class="collapsible-content" id="issuer-content">
+                    <div class="form-group">
+                        <label>Name / Firma</label>
+                        <input type="text" id="issuer_name" value="{{ issuer.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Straße</label>
+                        <input type="text" id="issuer_street" value="{{ issuer.street }}">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>PLZ</label>
+                            <input type="text" id="issuer_postal_code" value="{{ issuer.postal_code }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Stadt</label>
+                            <input type="text" id="issuer_city" value="{{ issuer.city }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefon</label>
+                        <input type="tel" id="issuer_phone" value="{{ issuer.phone }}">
+                    </div>
+                    <div class="form-group">
+                        <label>E-Mail</label>
+                        <input type="email" id="issuer_email" value="{{ issuer.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Steuernummer</label>
+                        <input type="text" id="issuer_tax_number" value="{{ issuer.tax_number }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Kunde -->
+            <div class="card">
+                <div class="card-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Kunde
+                </div>
+                <div class="form-group">
+                    <label>Name / Firma</label>
+                    <input type="text" id="client_name" placeholder="Kundenname" required>
+                </div>
+                <div class="form-group">
+                    <label>Straße</label>
+                    <input type="text" id="client_street" placeholder="Straße und Hausnummer">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>PLZ</label>
+                        <input type="text" id="client_postal_code" placeholder="12345">
+                    </div>
+                    <div class="form-group">
+                        <label>Stadt</label>
+                        <input type="text" id="client_city" placeholder="Stadt">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Positionen -->
+            <div class="card">
+                <div class="card-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Positionen
+                </div>
+                <div id="positions-container">
+                    <!-- Positionen werden hier eingefügt -->
+                </div>
+                <button type="button" class="btn-add" onclick="addPosition()">
+                    + Position hinzufügen
+                </button>
+                <div class="total-display">
+                    <div class="total-label">Gesamtbetrag</div>
+                    <div class="total-amount" id="total-amount">0,00 €</div>
+                </div>
+            </div>
+            
+            <!-- Bankdaten (eingeklappt) -->
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleSection('payment')">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    Bankverbindung
+                    <span class="toggle-icon" id="payment-icon">▼</span>
+                </div>
+                <div class="collapsible-content" id="payment-content">
+                    <div class="form-group">
+                        <label>Kontoinhaber</label>
+                        <input type="text" id="account_holder" value="{{ payment.account_holder }}">
+                    </div>
+                    <div class="form-group">
+                        <label>IBAN</label>
+                        <input type="text" id="iban" value="{{ payment.iban }}">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>BIC</label>
+                            <input type="text" id="bic" value="{{ payment.bic }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Bank</label>
+                            <input type="text" id="bank_name" value="{{ payment.bank_name }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-generate" id="generateBtn">
+                📄 Rechnung erstellen
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>PDF wird erstellt...</p>
+            </div>
+        </form>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        let positionCount = 0;
+        
+        // Datum auf heute setzen
+        document.getElementById('invoice_date').valueAsDate = new Date();
+        
+        // Erste Position hinzufügen
+        addPosition();
+        
+        function addPosition() {
+            positionCount++;
+            const container = document.getElementById('positions-container');
+            const html = `
+                <div class="position-item" id="position-${positionCount}">
+                    <div class="position-header">
+                        <span class="position-number">Position ${positionCount}</span>
+                        <button type="button" class="btn-remove" onclick="removePosition(${positionCount})">×</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Beschreibung</label>
+                        <input type="text" name="desc_${positionCount}" placeholder="Leistungsbeschreibung" oninput="calculateTotal()">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Menge</label>
+                            <input type="number" name="qty_${positionCount}" placeholder="1" step="0.5" min="0" oninput="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>Einheit</label>
+                            <input type="text" name="unit_${positionCount}" placeholder="Std.">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Einzelpreis (€)</label>
+                        <input type="number" name="price_${positionCount}" placeholder="0,00" step="0.01" min="0" oninput="calculateTotal()">
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        
+        function removePosition(id) {
+            const element = document.getElementById(`position-${id}`);
+            if (element && document.querySelectorAll('.position-item').length > 1) {
+                element.remove();
+                calculateTotal();
+            }
+        }
+        
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.position-item').forEach(item => {
+                const qty = parseFloat(item.querySelector('[name^="qty_"]').value) || 0;
+                const price = parseFloat(item.querySelector('[name^="price_"]').value) || 0;
+                total += qty * price;
+            });
+            document.getElementById('total-amount').textContent = 
+                total.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        }
+        
+        function toggleSection(section) {
+            const content = document.getElementById(`${section}-content`);
+            const icon = document.getElementById(`${section}-icon`);
+            content.classList.toggle('open');
+            icon.classList.toggle('open');
+        }
+        
+        function showToast(message, isSuccess = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (isSuccess ? ' success' : '');
+            setTimeout(() => toast.className = 'toast', 3000);
+        }
+        
+        document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            
+            btn.disabled = true;
+            loading.classList.add('active');
+            
+            // Positionen sammeln
+            const items = [];
+            document.querySelectorAll('.position-item').forEach(item => {
+                const desc = item.querySelector('[name^="desc_"]').value;
+                const qty = item.querySelector('[name^="qty_"]').value;
+                const unit = item.querySelector('[name^="unit_"]').value;
+                const price = item.querySelector('[name^="price_"]').value;
+                
+                if (desc && qty && price) {
+                    items.push({
+                        description: desc,
+                        quantity: qty,
+                        unit: unit,
+                        unit_price: price
+                    });
+                }
+            });
+            
+            if (items.length === 0) {
+                showToast('Bitte mindestens eine Position hinzufügen');
+                btn.disabled = false;
+                loading.classList.remove('active');
+                return;
+            }
+            
+            const data = {
+                invoice_number: document.getElementById('invoice_number').value,
+                invoice_date: document.getElementById('invoice_date').value,
+                due_days: document.getElementById('due_days').value,
+                
+                issuer_name: document.getElementById('issuer_name').value,
+                issuer_street: document.getElementById('issuer_street').value,
+                issuer_postal_code: document.getElementById('issuer_postal_code').value,
+                issuer_city: document.getElementById('issuer_city').value,
+                issuer_phone: document.getElementById('issuer_phone').value,
+                issuer_email: document.getElementById('issuer_email').value,
+                issuer_tax_number: document.getElementById('issuer_tax_number').value,
+                
+                client_name: document.getElementById('client_name').value,
+                client_street: document.getElementById('client_street').value,
+                client_postal_code: document.getElementById('client_postal_code').value,
+                client_city: document.getElementById('client_city').value,
+                
+                account_holder: document.getElementById('account_holder').value,
+                iban: document.getElementById('iban').value,
+                bic: document.getElementById('bic').value,
+                bank_name: document.getElementById('bank_name').value,
+                
+                items: items
+            };
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Rechnung_${data.invoice_number}_${new Date().toISOString().split('T')[0]}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    showToast('Rechnung erstellt! ✓', true);
+                } else {
+                    const error = await response.json();
+                    showToast('Fehler: ' + (error.error || 'Unbekannter Fehler'));
+                }
+            } catch (err) {
+                showToast('Verbindungsfehler: ' + err.message);
+            }
+            
+            btn.disabled = false;
+            loading.classList.remove('active');
+        });
+        
+        // Daten im LocalStorage speichern
+        function saveFormData() {
+            const fields = ['issuer_name', 'issuer_street', 'issuer_postal_code', 'issuer_city', 
+                          'issuer_phone', 'issuer_email', 'issuer_tax_number',
+                          'account_holder', 'iban', 'bic', 'bank_name'];
+            const data = {};
+            fields.forEach(id => {
+                data[id] = document.getElementById(id).value;
+            });
+            localStorage.setItem('invoiceFormData', JSON.stringify(data));
+        }
+        
+        function loadFormData() {
+            const saved = localStorage.getItem('invoiceFormData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && data[id]) el.value = data[id];
+                });
+            }
+        }
+        
+        // Daten laden beim Start
+        loadFormData();
+        
+        // Daten speichern bei Änderung
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', saveFormData);
+        });
+    </script>
+</body>
+</html>
